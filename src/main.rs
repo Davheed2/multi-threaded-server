@@ -97,17 +97,32 @@ fn handle_connection(mut stream: TcpStream) {
 
     // stream.write_all(response.as_bytes()).unwrap();
 
-    let request_line = buf_reader
-        .lines()
-        .next()
-        .unwrap_or_else(|| {
-            eprintln!("Failed to create empty string");
-            std::process::exit(1);
-        })
-        .unwrap_or_else(|err| {
-            eprintln!("Failed to read request line: {}", err);
-            String::new()
-        });
+    // let request_line = buf_reader
+    //     .lines()
+    //     .next()
+    //     .unwrap_or_else(|| {
+    //         eprintln!("Failed to create empty string");
+    //         String::new();
+    //     })
+    //     .unwrap_or_else(|err| {
+    //         eprintln!("Failed to read request line: {}", err);
+    //         String::new()
+    //     });
+    
+    let request_line = match buf_reader.lines().next() {
+        Some(line) =>
+            match line {
+                Ok(line) => line,
+                Err(err) => {
+                    eprintln!("Error reading request line: {}", err);
+                    return;
+                }
+            }
+        None => {
+            eprintln!("Empty request received");
+            return;
+        }
+    };
 
     // let (status_line, filename) = if request_line == "GET / HTTP/1.1" {
     //     ("HTTP/1.1 200 OK", "index.html")
